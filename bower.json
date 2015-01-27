@@ -1,0 +1,21 @@
+{
+  "name": "my-gulpfile",
+  "version": "0.0.1",
+  "moduleType": [
+    "globals"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "jquery": "1.11.1",
+    "modernizer": "~2.8.2"
+  },
+  "overrides": {
+    "modernizer": {
+      "main": "modernizr.js"
+    }
+  }
+}
