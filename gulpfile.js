@@ -89,20 +89,20 @@ gulp.task('bs', function() {
  * Build
  */
 gulp.task('build:html', function() {
-  gulp.src(config.src + '*.html')
+  return gulp.src(config.src + '*.html')
     .pipe(gulp.dest(config.dist))
     .pipe($.if(config.reload, $.browserSync.reload({ stream: true })));
 });
 
 gulp.task('build:css', function() {
-  gulp.src(config.src + 'css/*.css')
+  return gulp.src(config.src + 'css/*.css')
     .pipe($.pleeease(config.pleeeaseOption))
     .pipe(gulp.dest(config.dist + 'css/'))
     .pipe($.if(config.reload, $.browserSync.reload({ stream: true })));
 });
 
 gulp.task('build:js', function() {
-  gulp.src(config.src + 'js/*.js')
+  return gulp.src(config.src + 'js/*.js')
     .pipe($.jshint())
     .pipe($.jshint.reporter($.jshintStylish))
     .pipe($.jshint.reporter('fail'))
