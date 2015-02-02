@@ -3,8 +3,11 @@
 var gulp = require('gulp');
 var $ = require('gulp-load-plugins')({
   pattern: [
-    'gulp-*', 
+    'gulp-*',
+    'postcss-*',
+    'autoprefixer-core',
     'browser-sync',
+    'css-mqpacker',
     'jshint-stylish',
     'main-bower-files',
     'run-sequence' 
@@ -23,22 +26,16 @@ var config = {
   injectOption: {
     ignorePath: 'build'
   },
-  pleeeaseOption: {
-    fallbacks: {
-      'autoprefixer': ['last 2 versions', 'Android >= 2.3'],
-      'pseudoElements': true,
-      'import': true,
-      'sourcemaps': true,
-      'next': true      
-    },
-    optimizers: {
-        minifier: false
+  postOption: {
+    autoprefixer: {'browsers': ['last 2 versions', 'android >= 2.3']},
+    import: { 
+      'path': './src/css'
     }
   }
 }
 
 /**
- * Inject
+ * Inject　(Bowerを使用しない場合は、このタスクごと削除する)
  */
 gulp.task('inject', function() {
   // # Bowerのリストをターミナルに表示
@@ -96,7 +93,13 @@ gulp.task('build:html', function() {
 
 gulp.task('build:css', function() {
   return gulp.src(config.src + 'css/*.css')
-    .pipe($.pleeease(config.pleeeaseOption))
+    .pipe($.sourcemaps.init())
+    .pipe($.postcss([
+      $.postcssImport( config.postOption.import ),
+      $.cssMqpacker,
+      $.autoprefixerCore( config.postOption.autoprefixer )
+    ]))
+    .pipe($.sourcemaps.write('.'))
     .pipe(gulp.dest(config.dist + 'css/'))
     .pipe($.if(config.reload, $.browserSync.reload({ stream: true })));
 });
@@ -111,20 +114,36 @@ gulp.task('build:js', function() {
 });
 
 
+
+/**
+ * Helper
+ */
+gulp.task('diff:css', function() {
+  return gulp.src(config.src + 'css/*.css')
+    .pipe($.postcss([
+      $.postcssImport( config.postOption.import ),
+      $.cssMqpacker,
+      $.autoprefixerCore( config.postOption.autoprefixer )
+    ]))
+    .pipe($.diff('./build/css'))
+    .pipe($.diff.reporter());
+});
+
+
 /**
  * Watch
  */
 gulp.task('watch', function() {
   gulp.watch(
-    config.src + '*.html', 
+    config.src + '**/*.html', 
     ['build:html']);
 
   gulp.watch(
-    config.src + 'css/*.css', 
+    config.src + 'css/**/*.css', 
     ['build:css']);
 
   gulp.watch(
-    config.src + 'js/*.js', 
+    config.src + 'js/**/*.js', 
     ['build:js']);
 });
 
@@ -144,7 +163,6 @@ gulp.task('default', function() {
 
 // 外部ファイルなどの追加時など
 gulp.task('build', function() {
-  // config.reload = false;
   $.runSequence(
     ['build:css', 'build:js'], 
     'inject',
@@ -156,6 +174,14 @@ gulp.task('build', function() {
 gulp.task('release', function() {
   $.runSequence(
     // task
+  );
+});
+
+
+// リリース用のファイルを修正された時
+gulp.task('diff', function() {
+  $.runSequence(
+    'diff:css'
   );
 });
 
